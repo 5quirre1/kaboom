@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>kaboom</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #f0f0f0;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="swagCanvas"></canvas>
+
+    <script>
+        // ok
+        const canvas = document.getElementById('swagCanvas'); //  canvas
+        const ctx = canvas.getContext('2d'); // ctx
+
+        // resize
+        function resizeRq() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeRq); // resize
+        resizeRq(); // rezie
+
+        // load explosion
+        const explosionImg = new Image();
+        explosionImg.src = 'resources/explosion.png';
+
+        // kaboom
+        const boomSound = new Audio('resources/boom.wav');
+
+        // frame stuff
+        const NUM_FRAMES_PER_LINE = 5;
+        const NUM_LINES = 5;
+
+        let frameWidth = 0;
+        let frameHeight = 0;
+
+        let currentFrame = 0;
+        let currentLine = 0;
+        let framesCounter = 0;
+        let active = false;
+
+        let position = { x: 0, y: 0 }; // pos
+
+        // explosion onlid
+        explosionImg.onload = () => {
+            frameWidth = explosionImg.width / NUM_FRAMES_PER_LINE;
+            frameHeight = explosionImg.height / NUM_LINES;
+            requestAnimationFrame(gameLoop);
+        };
+
+        canvas.addEventListener('click', (e) => { // event 
+            if (!active) {
+                position.x = e.clientX - frameWidth / 2;
+                position.y = e.clientY - frameHeight / 2;
+                active = true;
+                boomSound.currentTime = 0;
+                boomSound.play();
+            }
+        });
+
+        function gameLoop() { // game loop
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function update() { // update
+            if (active) {
+                framesCounter++;
+                if (framesCounter > 2) {
+                    currentFrame++;
+                    if (currentFrame >= NUM_FRAMES_PER_LINE) {
+                        currentFrame = 0;
+                        currentLine++;
+                        if (currentLine >= NUM_LINES) {
+                            currentLine = 0;
+                            active = false;
+                        }
+                    }
+                    framesCounter = 0;
+                }
+            }
+        }
+
+        function draw() {
+            //bbackground
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // draw explision
+            if (active) {
+                ctx.drawImage(
+                    explosionImg,
+                    currentFrame * frameWidth,
+                    currentLine * frameHeight,
+                    frameWidth,
+                    frameHeight,
+                    position.x,
+                    position.y,
+                    frameWidth,
+                    frameHeight
+                );
+            }
+        }
+    </script>
+</body>
+
+</html>
